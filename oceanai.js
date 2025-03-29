@@ -243,6 +243,7 @@ const modelResponses = {
       {
         questions: ["Llanura de Serengeti", "Serengeti"],
         response: [
+          "Te resumo la llanura del Serengeti, no te preocupes en cambiar de pagina:",
           "La llanura del Serengeti es famosa por la Gran Migración, donde millones de ñus, cebras y gacelas se desplazan en busca de agua y pasto.",
           "Este ecosistema es hogar de los 'Cinco Grandes': león, elefante, leopardo, rinoceronte y búfalo.",
           "Los depredadores como guepardos y hienas juegan un papel clave en el equilibrio ecológico de la región.",
