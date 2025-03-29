@@ -239,6 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
+  window.modelResponses = modelResponses; // Hacerlo global para el acceso a otros scripts
+
   const modelNames = {
     "wild-explorer-glx05": "Wild Explorer GLX0.5",
     "naturepedia-XZero1": "Naturepedia-XZero1",
