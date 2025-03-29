@@ -752,7 +752,7 @@ function getAllAvailableModels() {
 }
 
 // Agrega estas variables al inicio con las demás
-let currentPage = 0;
+let currentPageAI = 0;
 let totalPages = 0;
 const categoriesPerPage = 2;
 
@@ -760,8 +760,8 @@ function updateNavigation() {
   const prevButton = document.getElementById("prevModel");
   const nextButton = document.getElementById("nextModel");
 
-  prevButton.disabled = currentPage === 0;
-  nextButton.disabled = currentPage >= totalPages - 1;
+  prevButton.disabled = currentPageAI === 0;
+  nextButton.disabled = currentPageAI >= totalPages - 1;
 }
 
 // Nueva función para verificar estados
@@ -894,7 +894,7 @@ function initializeModelPages() {
 
   // 3. Configurar paginación
   totalPages = pagesContainer.children.length;
-  currentPage = 0;
+  currentPageAI = 0;
 
   // 4. Mostrar primera página
   document.querySelectorAll(".model-page").forEach((page, index) => {
@@ -946,19 +946,19 @@ function setupModelSelectors() {
 
 function changePage(direction) {
   const pages = document.querySelectorAll(".model-page");
-  const newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
+  const newPage = direction === "next" ? currentPageAI + 1 : currentPageAI - 1;
 
   // Animación de transición
-  gsap.to(pages[currentPage], {
+  gsap.to(pages[currentPageAI], {
     opacity: 0,
     duration: 0.3,
     onComplete: () => {
-      pages[currentPage].style.display = "none";
-      currentPage = newPage;
-      pages[currentPage].style.display = "flex";
+      pages[currentPageAI].style.display = "none";
+      currentPageAI = newPage;
+      pages[currentPageAI].style.display = "flex";
 
       gsap.fromTo(
-        pages[currentPage],
+        pages[currentPageAI],
         { opacity: 0 },
         {
           opacity: 1,
