@@ -241,9 +241,10 @@ const modelResponses = {
         ],
       },
       {
-        questions: ["Las Llanuras del"],
+        questions: ["Llanura de Serengeti", "Serengeti"],
         response: [
-          "La llanura del Serengeti es famosa por la Gran Migración, donde millones de ñus, cebras y gacelas se desplazan en busca de agua y pasto.",
+          "La llanura del Serengeti es famosa por la Gran Migración...",
+          // Respuesta detallada
         ],
       },
     ],
