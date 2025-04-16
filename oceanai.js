@@ -310,11 +310,9 @@ const modelResponses = {
         questions: ["hola", "extensiones", "recomendaciones"],
         response: [
           "🌱 ¡Hola! Soy Ecoxion-AprilGX, tu asistente ecológico digital.",
-          "Claro, te puedo recomendar algunas extensiones a instalar:",
+          "Claro, te puedo recomendar algunas extensiones a instalar, a la fecha del 16 de Abril de 2025 tengo estas, recuerda que voy a tratar de recopilar informacion actualizada lo mas antes posible:",
           "▸ Modo Zen: Esto relaja el header y ayuda mucho a la mejora visual de Ecoxion",
           "▸ Modo Oscuro: Altamente recomendable, los ojos te lo van a agradecer 🥳",
-          "▸ Eco-Scroll: Reduce el consumo de energía al optimizar el desplazamiento",
-          "▸ Green Filter: Filtro que reduce el brillo de la pantalla para ahorrar energía"
         ]
       },
       {
