@@ -8,6 +8,49 @@ const modelSelectors = document.querySelectorAll(".modelSelector");
 const themeButton = document.getElementById("themeButton");
 const themeMenu = document.getElementById("themeMenu");
 const themeOptions = document.querySelectorAll(".theme-option");
+// Variables globales
+let avatarMenu = null;
+let avatarButton = null;
+let avatarMenuOpen = false;
+
+// Función segura para obtener elementos
+function getSafeElement(id) {
+  const el = document.getElementById(id);
+  if (!el) console.error(`Elemento #${id} no encontrado`);
+  return el;
+}
+
+// Inicialización segura
+function initAvatarSystem() {
+  avatarMenu = getSafeElement("avatarMenu");
+  avatarButton = getSafeElement("avatarButton");
+  
+  if (!avatarMenu || !avatarButton) return false;
+
+  // Estado inicial
+  avatarMenu.style.display = "none";
+  
+  // Event listeners
+  avatarButton.addEventListener("click", toggleAvatarMenu);
+  
+  document.querySelectorAll(".avatar-option").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      avatarCustomizer.updateAvatar(e.target.textContent);
+      hideAvatarMenu();
+    });
+  });
+
+  return true;
+}
+
+
+// 2. Función para obtener el menú de avatar de forma segura
+function getAvatarMenu() {
+  if (!avatarMenu) {
+    avatarMenu = document.getElementById("avatarMenu");
+  }
+  return avatarMenu;
+}
 // Definir primero el objeto vacío a nivel global
 // Inicializar el namespace global al inicio del archivo
 window.OceanAI = window.OceanAI || {};
@@ -120,44 +163,53 @@ const modelConfig = {
   categories: [
     {
       title: "🌿 Wild Explorer",
-      releaseDate: "24/3/2025", // Fecha de lanzamiento de la categoría
+      releaseDate: "24/3/2025",
       models: [
         {
           value: "wild-explorer-glx05",
           name: "Wild Explorer GLX0.5 (Núcleo Geodésico)",
           isNew: true,
-          status: "available", // Estado actual del modelo
-          maintenanceUntil: "29/3/2025", // Fecha hasta la cual estará en mantenimiento
+          status: "available",
+          maintenanceUntil: "29/3/2025",
         },
         {
           value: "SpediaOriginal",
           name: "Spedia VOriginal",
-          status: "soon", // Próximamente disponible
-          releaseDate: "N/A", // Fecha de lanzamiento no disponible
+          status: "soon",
+          releaseDate: "30/4/2025", // Fecha futura
+          isNew: false
         },
       ],
     },
     {
       title: "📚 Naturepedia",
-      releaseDate: "N/A", // Fecha de lanzamiento de la categoría no disponible
+      releaseDate: "N/A",
       models: [
         {
           value: "naturepedia-XZero1",
           name: "Naturepedia-XZero1",
-          status: "available", // Estado actual del modelo
-          releaseDate: "N/A", // Fecha de lanzamiento no disponible
+          status: "available",
+          releaseDate: "N/A",
+          isNew: false
         },
       ],
     },
-  ],
+    {
+      title: "🌱 Ecoxion",
+      releaseDate: "15/4/2025",
+      models: [
+        {
+          value: "ecoxion-aprilgx",
+          name: "Ecoxion-AprilGX",
+          isNew: true,
+          status: "available",
+        }
+      ]
+    }
+  ]
 };
 
-// Actualizar modelOrder:
-const modelOrder = [
-  "wild-explorer-glx05",
-  "SpediaOriginal",
-  "naturepedia-XZero1",
-];
+
 const modelResponses = {
   "wild-explorer-glx05": {
     triggers: [
@@ -252,15 +304,54 @@ const modelResponses = {
       },
     ],
   },
+  "ecoxion-aprilgx": {
+    triggers: [
+      {
+        questions: ["hola", "extensiones", "recomendaciones"],
+        response: [
+          "🌱 ¡Hola! Soy Ecoxion-AprilGX, tu asistente ecológico digital.",
+          "Claro, te puedo recomendar algunas extensiones a instalar:",
+          "▸ Modo Zen: Esto relaja el header y ayuda mucho a la mejora visual de Ecoxion",
+          "▸ Modo Oscuro: Altamente recomendable, los ojos te lo van a agradecer 🥳",
+          "▸ Eco-Scroll: Reduce el consumo de energía al optimizar el desplazamiento",
+          "▸ Green Filter: Filtro que reduce el brillo de la pantalla para ahorrar energía"
+        ]
+      },
+      {
+        questions: ["que es ecoxion", "acerca de"],
+        response: [
+          "🌍 Ecoxion es un navegador web con conciencia ecológica",
+          "💚 Diseñado para minimizar el consumo de energía y recursos",
+          "🌿 Incluye funciones de sostenibilidad y bienestar digital",
+          "📱 Optimizado para dispositivos móviles y de bajo consumo"
+        ]
+      }
+    ],
+    default: [
+      "🌱 Por favor reformula tu pregunta en términos de sostenibilidad digital",
+      "💡 Prueba preguntando sobre 'extensiones recomendadas' o 'consejos ecológicos'"
+    ]
+  },
 };
 
 // Modificar esta línea:
 window.OceanAI.modelResponses = modelResponses; // Hacerlo global para el acceso a otros scripts
 
+// En modelOrder, añade el nuevo modelo:
+const modelOrder = [
+  "wild-explorer-glx05",
+  "SpediaOriginal",
+  "naturepedia-XZero1",
+  "ecoxion-aprilgx"
+];
+
+// En modelNames, añade el nombre para mostrar:
 const modelNames = {
   "wild-explorer-glx05": "Wild Explorer GLX0.5",
   "naturepedia-XZero1": "Naturepedia-XZero1",
+  "ecoxion-aprilgx": "Ecoxion-AprilGX"
 };
+
 
 // Añade esta función al inicio del script:
 function findFirstAvailableModel() {
@@ -279,52 +370,77 @@ let selectedModel = findFirstAvailableModel();
 
 let menuOpen = false;
 
-const avatarButton = document.getElementById("avatarButton");
-const avatarMenu = document.getElementById("avatarMenu");
 
-let avatarMenuOpen = false; // Controla si el menú está abierto o cerrado
 
-avatarButton.addEventListener("click", (e) => {
-  console.log("Botón de avatar clickeado"); // ✅ Ver si el botón responde
-  e.stopPropagation();
-  setTimeout(() => toggleAvatarMenu(), 10);
-});
 
-function toggleAvatarMenu() {
-  if (avatarMenuOpen) {
-    hideAvatarMenu(); // Si ya está abierto, lo cerramos
-    return;
-  }
 
-  if (!avatarButton || !avatarMenu) {
+// 3. Función para inicializar el menú de avatar
+function initAvatarMenu() {
+  avatarMenu = document.getElementById("avatarMenu");
+  avatarButton = document.getElementById("avatarButton");
+
+  if (!avatarMenu || !avatarButton) {
     console.error("Elementos del avatar no encontrados");
+    return false;
+  }
+
+  // Configurar estado inicial
+  avatarMenu.style.display = "none";
+  avatarMenuOpen = false;
+
+  // Event listeners
+  avatarButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleAvatarMenu();
+  });
+
+  document.querySelectorAll(".avatar-option").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      avatarCustomizer.updateAvatar(e.target.textContent);
+      hideAvatarMenu();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (avatarMenuOpen && !event.target.closest("#avatarMenu") && !event.target.closest("#avatarButton")) {
+      hideAvatarMenu();
+    }
+  });
+
+  return true;
+}
+
+window.addEventListener("DOMContentLoaded", initAvatarMenu);
+
+
+
+// 4. Función para mostrar/ocultar el menú
+function toggleAvatarMenu() {
+  const menu = getAvatarMenu();
+  if (!menu || !avatarButton) return;
+
+  if (avatarMenuOpen) {
+    hideAvatarMenu();
     return;
   }
 
-  gsap.killTweensOf(avatarMenu);
-  avatarMenu.style.display = "flex";
-  avatarMenu.style.opacity = "1";
-  avatarMenu.style.transform = "none";
-  avatarMenu.style.position = "fixed"; // O "absolute" según tu caso
-  avatarMenu.style.top = "290px"; // Ajusta según tu diseño
-  avatarMenu.style.left = "1218px"; // Ajusta según tu diseño
-  avatarMenu.style.transform = "none"; // Evita que GSAP lo desplace fuera de pantalla
-  avatarMenu.style.opacity = "1"; // Asegura que se vea
-  avatarMenu.style.zIndex = "9999"; // Asegura que esté encima de otros elementos
-
-  gsap.fromTo(
-    avatarMenu,
-    { opacity: 0, x: -10 },
-    {
-      opacity: 1,
-      x: 0,
-      duration: 0.3,
-      ease: "power2.out",
-      onStart: () => {
-        avatarMenuOpen = true;
-      },
+    // Animación segura
+    if (typeof gsap !== "undefined" && avatarMenu) {
+      gsap.killTweensOf(avatarMenu);
+      avatarMenu.style.display = "flex";
+      
+      gsap.fromTo(avatarMenu, 
+        { opacity: 0, x: -20 },
+        { 
+          opacity: 1, 
+          x: 0, 
+          duration: 0.3,
+          onStart: () => avatarMenuOpen = true
+        }
+      );
     }
-  );
+  
+
 }
 
 // Evento para cerrar el menú al hacer clic fuera
@@ -338,8 +454,6 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Ocultar el menú al inicio
-avatarMenu.style.display = "none";
 
 // Personalización de avatar
 const avatarCustomizer = {
@@ -368,19 +482,52 @@ document.querySelectorAll(".avatar-option").forEach((btn) => {
   });
 });
 
-// Función para cerrar el menú con animación
+// Versión robusta de hide
 function hideAvatarMenu() {
-  gsap.to(avatarMenu, {
-    opacity: 0,
-    x: -10,
-    duration: 0.2,
-    ease: "power2.in",
-    onComplete: () => {
-      avatarMenu.style.display = "none";
-      avatarMenuOpen = false;
-    },
-  });
+  if (!avatarMenu || !avatarMenuOpen) return;
+
+  if (typeof gsap !== "undefined") {
+    gsap.to(avatarMenu, {
+      opacity: 0,
+      duration: 0.2,
+      onComplete: () => {
+        if (avatarMenu) {
+          avatarMenu.style.display = "none";
+          avatarMenuOpen = false;
+        }
+      }
+    });
+  } else {
+    // Fallback si GSAP no está cargado
+    avatarMenu.style.display = "none";
+    avatarMenuOpen = false;
+  }
 }
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+  if (initAvatarSystem()) {
+    console.log("Sistema de avatar listo");
+  } else {
+    console.error("Error al inicializar el avatar");
+  }
+});
+
+// 6. Inicializar cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+  // Primero verificar que los elementos existen
+  if (!document.getElementById("avatarMenu") || !document.getElementById("avatarButton")) {
+    console.error("Elementos HTML del avatar no encontrados");
+    return;
+  }
+
+  // Luego inicializar
+  if (initAvatarMenu()) {
+    console.log("Avatar menu inicializado correctamente");
+  } else {
+    console.error("Error al inicializar el avatar menu");
+  }
+});
 
 // Agrega esto con las demás variables al inicio
 let avatarHelpInterval;
@@ -568,7 +715,7 @@ function getAIResponse(userMessage) {
 }
 
 openModelSelector.addEventListener("click", () => {
-  initializeModelPages(); // Asegura que se generan las opciones antes de abrir el modal
+  initModelSlider(); // Asegura que se generan las opciones antes de abrir el modal
   setupModelSelectors(); // Aplica los event listeners a los selects generados
 
   modelModal.style.display = "block";
@@ -681,6 +828,10 @@ function updateModelSelection() {
     select.value = selectedModel;
   });
 
+  let modelId = typeof selectedModel === "string" ? selectedModel : selectedModel?.value || "";
+  const displayName = modelNames[modelId] || modelId.replace(/-/g, " ");
+  document.getElementById("currentModelName").textContent = displayName;
+
   // Actualizar el indicador del modelo actual
   updateModelIndicator();
 
@@ -726,7 +877,7 @@ document.getElementById("prevModel").addEventListener("click", () => {
 });
 
 document.getElementById("nextModel").addEventListener("click", () => {
-  const availableModels = getAllAvailableModels();
+  const availableModels = getAllAvailableModelsFull();
   const currentIndex = availableModels.indexOf(selectedModel);
   const nextIndex = (currentIndex + 1) % availableModels.length;
   selectedModel = availableModels[nextIndex];
@@ -734,7 +885,7 @@ document.getElementById("nextModel").addEventListener("click", () => {
 });
 
 document.getElementById("prevModel").addEventListener("click", () => {
-  const availableModels = getAllAvailableModels();
+  const availableModels = getAllAvailableModelsFull();
   const currentIndex = availableModels.indexOf(selectedModel);
   const prevIndex =
     (currentIndex - 1 + availableModels.length) % availableModels.length;
@@ -742,23 +893,308 @@ document.getElementById("prevModel").addEventListener("click", () => {
   updateModelSelection();
 });
 
-// Añade estas funciones auxiliares:
-function getAllAvailableModels() {
+function getAllAvailableModelsFull() {
   const available = [];
   modelConfig.categories.forEach((category) => {
     category.models.forEach((model) => {
       if (checkModelStatus(model) === "available") {
-        available.push(model.value);
+        available.push({ ...model, categoryTitle: category.title });
       }
     });
   });
   return available;
 }
 
-// Agrega estas variables al inicio con las demás
-let currentPageAI = 0;
-let totalPages = 0;
-const categoriesPerPage = 2;
+
+// Variables para el slider
+let currentSliderPage = 0;
+let totalSliderPages = 0;
+const categoriesPerPage = 2; // Mostrar 2 categorías por página
+
+// Función para inicializar el slider
+function initModelSlider() {
+  const sliderContainer = document.querySelector('.model-pages');
+  if (!sliderContainer) return;
+
+  // Limpiar contenedor
+  sliderContainer.innerHTML = '';
+
+  // Calcular total de páginas
+  totalSliderPages = Math.ceil(modelConfig.categories.length / categoriesPerPage);
+
+  // Crear páginas
+  for (let i = 0; i < totalSliderPages; i++) {
+    const page = document.createElement('div');
+    page.className = 'model-page';
+    page.style.display = i === 0 ? 'flex' : 'none'; // Mostrar solo la primera página
+    sliderContainer.appendChild(page);
+  }
+
+  // Llenar páginas con categorías
+  updateSliderContent();
+  updateSliderNavigation();
+}
+
+// Función para actualizar el contenido del slider
+function updateSliderContent() {
+  const pages = document.querySelectorAll('.model-page');
+  if (!pages) return;
+
+  // Limpiar páginas
+  pages.forEach(page => page.innerHTML = '');
+
+  // Agregar categorías a cada página
+  for (let i = 0; i < totalSliderPages; i++) {
+    const startIdx = i * categoriesPerPage;
+    const endIdx = startIdx + categoriesPerPage;
+    const pageCategories = modelConfig.categories.slice(startIdx, endIdx);
+
+    pageCategories.forEach(category => {
+      const categoryCard = createCategoryCard(category);
+      pages[i].appendChild(categoryCard);
+    });
+  }
+}
+
+
+function createSimpleModelCard(model) {
+  const card = document.createElement('div');
+  card.className = 'category-card';
+
+  const title = document.createElement('h3');
+  title.textContent = model.categoryTitle + ' - ' + model.name;
+
+  const select = document.createElement('button');
+  select.textContent = 'Seleccionar';
+  select.className = 'model-selector';
+  select.addEventListener('click', () => {
+    selectedModel = model.value;
+    updateModelSelection();
+  });
+
+  card.appendChild(title);
+  card.appendChild(select);
+
+  return card;
+}
+
+
+// Función para crear una tarjeta de categoría
+function createCategoryCard(category) {
+  const categoryDiv = document.createElement('div');
+  categoryDiv.className = 'category-card';
+  
+  const title = document.createElement('h3');
+  title.textContent = category.title;
+  categoryDiv.appendChild(title);
+  
+  const select = document.createElement('select');
+  select.className = 'model-selector';
+  
+  // Opción por defecto
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = `Selecciona un modelo ${category.title}`;
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
+  
+  // Agregar modelos disponibles
+  category.models.forEach(model => {
+    if (checkModelStatus(model) === 'available') {
+      const option = document.createElement('option');
+      option.value = model.value;
+      option.textContent = model.name;
+      if (model.value === selectedModel) {
+        option.selected = true;
+        defaultOption.selected = false;
+      }
+      select.appendChild(option);
+    }
+  });
+  
+  select.addEventListener('change', function(e) {
+    if (e.target.value) {
+      selectedModel = e.target.value;
+      updateModelSelection();
+    }
+  });
+  
+  categoryDiv.appendChild(select);
+  return categoryDiv;
+}
+
+
+function createModelCard(model) {
+  const card = document.createElement('div');
+  card.className = 'model-card';
+  
+  const isAvailable = checkModelStatus(model) === 'available';
+  const isCurrent = selectedModel === model.value;
+  
+  card.innerHTML = `
+    <h3>${model.name}</h3>
+    ${model.description ? `<p>${model.description}</p>` : ''}
+    <select class="model-selector">
+      <option value="${model.value}" ${!isAvailable ? 'disabled' : ''} ${isCurrent ? 'selected' : ''}>
+        ${isAvailable ? 'Seleccionar' : 'No disponible'}
+      </option>
+    </select>
+  `;
+  
+  return card;
+}
+
+function navigateSlider(direction) {
+  const pages = document.querySelectorAll(".model-page");
+  if (!pages || pages.length === 0) return;
+
+  const newPage = direction === "next" ? currentSliderPage + 1 : currentSliderPage - 1;
+  
+  // Verificar límites
+  if (newPage < 0 || newPage >= pages.length) return;
+
+  // Animación segura
+  if (typeof gsap !== "undefined") {
+    gsap.to(pages[currentSliderPage], {
+      opacity: 0,
+      duration: 0.3,
+      onComplete: () => {
+        pages[currentSliderPage].style.display = "none";
+        currentSliderPage = newPage;
+        
+        if (pages[currentSliderPage]) {
+          pages[currentSliderPage].style.display = "flex";
+          gsap.fromTo(pages[currentSliderPage], 
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.3 }
+          );
+        }
+        updateSliderNavigation();
+      }
+    });
+  }
+}
+
+
+// Función para actualizar la navegación del slider
+function updateSliderNavigation() {
+  const prevBtn = document.getElementById('prevModel');
+  const nextBtn = document.getElementById('nextModel');
+  
+  prevBtn.disabled = currentSliderPage === 0;
+  nextBtn.disabled = currentSliderPage >= totalSliderPages - 1;
+}
+
+
+// Event listeners para los botones
+document.getElementById('prevModel').addEventListener('click', () => navigateSlider('prev'));
+document.getElementById('nextModel').addEventListener('click', () => navigateSlider('next'));
+
+
+function updatePageContent() {
+  const pages = document.querySelectorAll(".model-page");
+  pages.forEach((page, pageIndex) => {
+    page.innerHTML = ""; // Limpiar antes de agregar contenido
+
+    const startIdx = pageIndex * categoriesPerPage;
+    const endIdx = startIdx + categoriesPerPage;
+    const pageCategories = modelConfig.categories.slice(startIdx, endIdx);
+
+    pageCategories.forEach(category => {
+      const categoryDiv = createCategoryElement(category);
+      page.appendChild(categoryDiv);
+    });
+  });
+}
+
+// Función para crear el selector de modelos por categoría
+function createCategorySelector(category) {
+  const categoryDiv = document.createElement('div');
+  categoryDiv.className = 'category-selector';
+
+  // Título de la categoría
+  const title = document.createElement('h3');
+  title.className = 'category-title';
+  title.textContent = category.title;
+  categoryDiv.appendChild(title);
+
+  // Selector de modelos
+  const select = document.createElement('select');
+  select.className = 'model-selector';
+  
+  // Opción por defecto
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = `Selecciona un modelo ${category.title}`;
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
+
+  // Agregar modelos disponibles
+  category.models.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model.value;
+    option.textContent = model.name;
+    option.disabled = checkModelStatus(model) !== 'available';
+    
+    // Marcar como seleccionado si es el modelo actual
+    if (model.value === selectedModel) {
+      option.selected = true;
+      defaultOption.selected = false;
+    }
+    
+    select.appendChild(option);
+  });
+
+  // Evento para cambiar de modelo
+  select.addEventListener('change', function() {
+    if (this.value) {
+      selectedModel = this.value;
+      updateModelIndicator();
+      // Opcional: Mostrar mensaje de bienvenida del modelo
+      showModelWelcomeMessage();
+    }
+  });
+
+  categoryDiv.appendChild(select);
+  return categoryDiv;
+}
+
+// Función para mostrar mensaje de bienvenida del modelo
+function showModelWelcomeMessage() {
+  const welcomeResponses = modelResponses[selectedModel]?.triggers.find(t => 
+    t.questions.some(q => q.includes('hola'))
+  );
+  
+  if (welcomeResponses) {
+    const response = typeof welcomeResponses.response === 'function'
+      ? welcomeResponses.response()
+      : welcomeResponses.response;
+    addMessage(response, 'ai');
+  }
+}
+
+function showCurrentPage() {
+  const categories = document.querySelectorAll(".category");
+  const startIdx = currentPageAI * categoriesPerPage;
+  const endIdx = startIdx + categoriesPerPage;
+
+  categories.forEach((category, index) => {
+    if (index >= startIdx && index < endIdx) {
+      category.style.display = "flex";
+      gsap.fromTo(category, 
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.3 }
+      );
+    } else {
+      category.style.display = "none";
+    }
+  });
+}
+
+
+
 
 function updateNavigation() {
   const prevButton = document.getElementById("prevModel");
@@ -767,6 +1203,19 @@ function updateNavigation() {
   prevButton.disabled = currentPageAI === 0;
   nextButton.disabled = currentPageAI >= totalPages - 1;
 }
+
+
+
+// Obtener modelo por ID
+function getModelById(modelId) {
+  for (const category of modelConfig.categories) {
+    const found = category.models.find(m => m.value === modelId);
+    if (found) return found;
+  }
+  return null;
+}
+
+
 
 // Nueva función para verificar estados
 function checkModelStatus(model) {
@@ -794,6 +1243,77 @@ function generateModelCategories() {
   pagesContainer.innerHTML = "";
   upcomingContainer.innerHTML = ""; // Limpia para evitar duplicados
   statusMainContainer.innerHTML = ""; // Limpia estados
+
+  // Procesar todos los modelos para encontrar los próximos
+  let hasUpcomingModels = false;
+
+  modelConfig.categories.forEach(category => {
+    category.models.forEach(model => {
+      const status = checkModelStatus(model);
+      
+      if (status === "soon" || status === "unavailable") {
+        hasUpcomingModels = true;
+        
+        const item = document.createElement("div");
+        item.className = `upcoming-model-item ${status}`;
+        
+        item.innerHTML = `
+          <span class="model-name">${model.name}</span>
+          <span class="status-indicator">
+            ${status === "soon" 
+              ? `🚀 Lanzamiento: ${model.releaseDate || "Próximamente"}` 
+              : `🔧 Mantenimiento hasta: ${model.maintenanceUntil}`}
+          </span>
+        `;
+        
+        upcomingContainer.appendChild(item);
+      }
+    });
+  });
+
+  const upcomingModels = [];
+
+    
+  // Eliminar duplicados
+  const uniqueUpcomingModels = upcomingModels.filter(
+    (model, index, self) => index === self.findIndex(m => m.value === model.value)
+  );
+
+    // Mostrar en el contenedor
+    if (uniqueUpcomingModels.length > 0) {
+      uniqueUpcomingModels.forEach(model => {
+        const item = document.createElement('div');
+        item.className = `upcoming-model-item ${checkModelStatus(model)}`;
+        
+        item.innerHTML = `
+          <div class="upcoming-model-info">
+            <span class="model-name">${model.name}</span>
+            <span class="model-category">${model.category}</span>
+          </div>
+          <span class="status-indicator">
+            ${checkModelStatus(model) === 'soon' 
+              ? `🚀 Lanzamiento: ${model.releaseDate || "Próximamente"}` 
+              : `🔧 Mantenimiento hasta: ${model.maintenanceUntil}`}
+          </span>
+        `;
+        
+        upcomingContainer.appendChild(item);
+      });
+    } else {
+      upcomingContainer.innerHTML = `
+      `;
+    }
+    
+
+  // Mostrar mensaje si no hay próximos lanzamientos
+  if (!hasUpcomingModels) {
+    upcomingContainer.innerHTML = `
+      <div class="no-upcoming-models">
+        No hay modelos próximos a lanzarse
+      </div>
+    `;
+  }
+
 
   modelConfig.categories.forEach((category) => {
     const categoryDiv = document.createElement("div");
@@ -878,101 +1398,55 @@ function generateModelCategories() {
   });
 }
 
-// Reemplaza la función initializeModelPages con esta versión
-function initializeModelPages() {
-  const pagesContainer = document.querySelector(".model-pages");
 
-  // 1. Generar categorías base
-  generateModelCategories();
 
-  // 2. Agrupar en páginas
-  const categories = Array.from(pagesContainer.querySelectorAll(".category"));
-  pagesContainer.innerHTML = "";
-
-  while (categories.length) {
-    const page = document.createElement("div");
-    page.className = "model-page";
-    page.append(...categories.splice(0, categoriesPerPage));
-    pagesContainer.appendChild(page);
-  }
-
-  // 3. Configurar paginación
-  totalPages = pagesContainer.children.length;
-  currentPageAI = 0;
-
-  // 4. Mostrar primera página
-  document.querySelectorAll(".model-page").forEach((page, index) => {
-    page.style.display = index === 0 ? "flex" : "none";
-    gsap.set(page, { opacity: index === 0 ? 1 : 0 });
-  });
-
-  // Marcar el modelo seleccionado actual en todos los selectores
-  document.querySelectorAll(".modelSelector").forEach((select) => {
-    select.value = selectedModel;
-  });
-
-  updateNavigation();
-}
-
-// Actualizar event listeners para selects dinámicos
 function setupModelSelectors() {
-  document.querySelectorAll(".modelSelector").forEach((select) => {
-    select.addEventListener("change", (event) => {
-      // Restablecer los otros selectores
-      document.querySelectorAll(".modelSelector").forEach((sel) => {
-        if (sel !== event.target) sel.value = "";
-      });
-
-      selectedModel = event.target.value;
-      updateModelSelection();
-
-      selectedModel = event.target.value;
-      clearChat();
+  document.querySelectorAll('.model-selector').forEach(select => {
+    select.addEventListener('change', function(e) {
+      selectedModel = e.target.value;
       updateModelIndicator();
-      updateManualContent(); // Asegurar que esto se ejecute
-
-      // Añadir un mensaje de bienvenida del nuevo modelo
-      const welcomeResponses = modelResponses[selectedModel]?.triggers.find(
-        (t) => t.questions.some((q) => q.includes("hola"))
-      ); // <- Cierre de paréntesis corregido aquí
-
+      
+      // Opcional: Mostrar mensaje de bienvenida del nuevo modelo
+      const welcomeResponses = modelResponses[selectedModel]?.triggers.find(t => 
+        t.questions.some(q => q.includes('hola'))
+      );
+      
       if (welcomeResponses) {
-        const response =
-          typeof welcomeResponses.response === "function"
-            ? welcomeResponses.response()
-            : welcomeResponses.response;
-
-        addMessage(response, "ai");
+        const response = typeof welcomeResponses.response === 'function'
+          ? welcomeResponses.response()
+          : welcomeResponses.response;
+        addMessage(response, 'ai');
       }
     });
   });
 }
 
+
 function changePage(direction) {
-  const pages = document.querySelectorAll(".model-page");
   const newPage = direction === "next" ? currentPageAI + 1 : currentPageAI - 1;
 
-  // Animación de transición
-  gsap.to(pages[currentPageAI], {
-    opacity: 0,
-    duration: 0.3,
-    onComplete: () => {
-      pages[currentPageAI].style.display = "none";
-      currentPageAI = newPage;
-      pages[currentPageAI].style.display = "flex";
-
-      gsap.fromTo(
-        pages[currentPageAI],
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 0.3,
-        }
-      );
-
-      updateNavigation();
-    },
-  });
+  if (newPage >= 0 && newPage < totalPages) {
+    const pages = document.querySelectorAll(".model-page");
+    
+    // Animación de salida
+    gsap.to(pages[currentPageAI], {
+      opacity: 0,
+      duration: 0.3,
+      onComplete: () => {
+        pages[currentPageAI].style.display = "none";
+        currentPageAI = newPage;
+        pages[currentPageAI].style.display = "flex";
+        
+        // Animación de entrada
+        gsap.fromTo(pages[currentPageAI], 
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.3 }
+        );
+        
+        updateNavigation();
+      }
+    });
+  }
 }
 
 // Función para capitalizar la primera letra de cada palabra
@@ -1125,10 +1599,12 @@ function updateManualContent() {
 }
 
 function updateModelIndicator() {
-  const displayName =
-    modelNames[selectedModel] || selectedModel.replace(/_/g, " ");
   const modelNameElement = document.getElementById("currentModelName");
   const manualNameElement = document.getElementById("modelManualName");
+
+  let modelId = typeof selectedModel === "string" ? selectedModel : selectedModel?.value || "";
+  const displayName = modelNames[modelId] || modelId.replace(/-/g, " ");
+  document.getElementById("currentModelName").textContent = displayName;
 
   if (modelNameElement) {
     modelNameElement.textContent = toTitleCase(displayName);
